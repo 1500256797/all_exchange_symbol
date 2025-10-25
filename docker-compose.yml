@@ -33,6 +33,33 @@ services:
     networks:
       - exchange_network
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: exchange_symbols_app
+    restart: always
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: your_mysql_password
+      MYSQL_DATABASE: exchange_symbols
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      LOG_LEVEL: info
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - exchange_network
+    # 如果需要查看日志
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   mysql_data:
     driver: local
