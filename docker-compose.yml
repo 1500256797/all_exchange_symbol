@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: exchange_symbols_mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: your_mysql_password
+      MYSQL_DATABASE: exchange_symbols
+    volumes:
+      # 数据持久化
+      - mysql_data:/var/lib/mysql
+      # 自动执行初始化SQL脚本
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-uroot",
+          "-pyour_mysql_password",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - exchange_network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  exchange_network:
+    driver: bridge
